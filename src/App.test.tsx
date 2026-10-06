@@ -102,4 +102,62 @@ describe("App", () => {
       expect(screen.getByText("2 Active Todos")).toBeInTheDocument();
     });
   });
+
+  describe("editing", () => {
+    it("changes a Todo's Title", async () => {
+      const user = userEvent.setup();
+      render(<App />);
+      await addTodo(user, "Buy milk");
+      await user.click(screen.getByRole("button", { name: "Edit: Buy milk" }));
+      const title = screen.getByRole("textbox", { name: "Title" });
+      await user.clear(title);
+      await user.type(title, "Buy oat milk");
+      await user.click(screen.getByRole("button", { name: "Save" }));
+      expect(todoTitles()).toEqual(["Buy oat milk"]);
+    });
+
+    it("rejects saving an empty Title and keeps the previous one", async () => {
+      const user = userEvent.setup();
+      render(<App />);
+      await addTodo(user, "Buy milk");
+      await user.click(screen.getByRole("button", { name: "Edit: Buy milk" }));
+      await user.clear(screen.getByRole("textbox", { name: "Title" }));
+      await user.type(screen.getByRole("textbox", { name: "Title" }), "   ");
+      await user.click(screen.getByRole("button", { name: "Save" }));
+      expect(screen.getByRole("alert")).toHaveTextContent("A Todo needs a Title");
+
+      await user.click(screen.getByRole("button", { name: "Cancel" }));
+      expect(todoTitles()).toEqual(["Buy milk"]);
+    });
+
+    it("adds a multi-line Description that keeps its line breaks after a reload", async () => {
+      const user = userEvent.setup();
+      const { unmount } = render(<App />);
+      await addTodo(user, "Pack");
+      await user.click(screen.getByRole("button", { name: "Edit: Pack" }));
+      await user.type(screen.getByRole("textbox", { name: "Description" }), "Passport{Enter}<b>Charger</b>");
+      await user.click(screen.getByRole("button", { name: "Save" }));
+      unmount();
+
+      render(<App />);
+      expect(within(todoItem("Pack")).getByTestId("todo-description").textContent).toBe(
+        "Passport\n<b>Charger</b>",
+      );
+    });
+
+    it("clears a Description", async () => {
+      const user = userEvent.setup();
+      render(<App />);
+      await addTodo(user, "Pack");
+      await user.click(screen.getByRole("button", { name: "Edit: Pack" }));
+      await user.type(screen.getByRole("textbox", { name: "Description" }), "Passport");
+      await user.click(screen.getByRole("button", { name: "Save" }));
+
+      await user.click(screen.getByRole("button", { name: "Edit: Pack" }));
+      expect(screen.getByRole("textbox", { name: "Description" })).toHaveValue("Passport");
+      await user.clear(screen.getByRole("textbox", { name: "Description" }));
+      await user.click(screen.getByRole("button", { name: "Save" }));
+      expect(within(todoItem("Pack")).queryByTestId("todo-description")).not.toBeInTheDocument();
+    });
+  });
 });

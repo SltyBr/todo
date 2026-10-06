@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from "react";
 import { loadTodos, saveTodos } from "./storage";
+import { TodoItem } from "./TodoItem";
 import { cleanTitle, type Todo } from "./todo";
 
 export function App() {
@@ -24,6 +25,10 @@ export function App() {
     updateTodos(todos.map((todo) => (todo.id === id ? { ...todo, completed: !todo.completed } : todo)));
   }
 
+  function handleSave(id: string, changes: { title: string; description: string }) {
+    updateTodos(todos.map((todo) => (todo.id === id ? { ...todo, ...changes } : todo)));
+  }
+
   return (
     <main className="app">
       <h1>Todos</h1>
@@ -38,17 +43,12 @@ export function App() {
       </form>
       <ul className="todo-list" aria-label="Todos">
         {todos.map((todo) => (
-          <li key={todo.id} className={todo.completed ? "todo completed" : "todo"}>
-            <input
-              type="checkbox"
-              aria-label={`Completed: ${todo.title}`}
-              checked={todo.completed}
-              onChange={() => handleToggle(todo.id)}
-            />
-            <span className="todo-title" data-testid="todo-title">
-              {todo.title}
-            </span>
-          </li>
+          <TodoItem
+            key={todo.id}
+            todo={todo}
+            onToggle={() => handleToggle(todo.id)}
+            onSave={(changes) => handleSave(todo.id, changes)}
+          />
         ))}
       </ul>
       {todos.length > 0 && (

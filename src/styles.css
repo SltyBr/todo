@@ -110,8 +110,7 @@ button.primary,
 }
 
 .todo-title {
-  flex: 1;
-  min-width: 0;
+  display: block;
   overflow-wrap: anywhere;
 }
 
@@ -136,5 +135,52 @@ button.primary,
   gap: 0.75rem;
   margin-top: 0.75rem;
   color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.todo-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.todo-description {
+  margin: 0.25rem 0 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.todo > button {
+  flex: none;
+  padding: 0.3rem 0.6rem;
+  font-size: 0.85rem;
+}
+
+.edit-todo {
+  display: grid;
+  gap: 0.6rem;
+  width: 100%;
+}
+
+.edit-todo label {
+  display: grid;
+  gap: 0.25rem;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.edit-todo textarea {
+  resize: vertical;
+}
+
+.actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.error {
+  margin: 0;
+  color: var(--danger);
   font-size: 0.9rem;
 }
