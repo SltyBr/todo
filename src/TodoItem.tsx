@@ -5,9 +5,10 @@ type Props = {
   todo: Todo;
   onToggle: () => void;
   onSave: (changes: { title: string; description: string }) => void;
+  onDelete: () => void;
 };
 
-export function TodoItem({ todo, onToggle, onSave }: Props) {
+export function TodoItem({ todo, onToggle, onSave, onDelete }: Props) {
   const [editing, setEditing] = useState(false);
   const [title, setTitle] = useState(todo.title);
   const [description, setDescription] = useState(todo.description);
@@ -81,6 +82,9 @@ export function TodoItem({ todo, onToggle, onSave }: Props) {
       </div>
       <button type="button" aria-label={`Edit: ${todo.title}`} onClick={startEditing}>
         Edit
+      </button>
+      <button type="button" className="delete" aria-label={`Delete: ${todo.title}`} onClick={onDelete}>
+        Delete
       </button>
     </li>
   );

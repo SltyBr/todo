@@ -29,6 +29,10 @@ export function App() {
     updateTodos(todos.map((todo) => (todo.id === id ? { ...todo, ...changes } : todo)));
   }
 
+  function handleDelete(id: string) {
+    updateTodos(todos.filter((todo) => todo.id !== id));
+  }
+
   return (
     <main className="app">
       <h1>Todos</h1>
@@ -48,6 +52,7 @@ export function App() {
             todo={todo}
             onToggle={() => handleToggle(todo.id)}
             onSave={(changes) => handleSave(todo.id, changes)}
+            onDelete={() => handleDelete(todo.id)}
           />
         ))}
       </ul>

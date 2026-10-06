@@ -103,6 +103,22 @@ describe("App", () => {
     });
   });
 
+  describe("deleting", () => {
+    it("removes a Todo, updates the Active count, and stays removed after a reload", async () => {
+      const user = userEvent.setup();
+      const { unmount } = render(<App />);
+      await addTodo(user, "Keep");
+      await addTodo(user, "Remove");
+      await user.click(screen.getByRole("button", { name: "Delete: Remove" }));
+      expect(todoTitles()).toEqual(["Keep"]);
+      expect(screen.getByText("1 Active Todo")).toBeInTheDocument();
+      unmount();
+
+      render(<App />);
+      expect(todoTitles()).toEqual(["Keep"]);
+    });
+  });
+
   describe("editing", () => {
     it("changes a Todo's Title", async () => {
       const user = userEvent.setup();

@@ -184,3 +184,7 @@ button.primary,
   color: var(--danger);
   font-size: 0.9rem;
 }
+
+.todo > button.delete {
+  color: var(--danger);
+}
