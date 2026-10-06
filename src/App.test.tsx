@@ -174,6 +174,35 @@ describe("App", () => {
     });
   });
 
+  describe("Clear completed", () => {
+    it("is only offered when at least one Todo is Completed", async () => {
+      const user = userEvent.setup();
+      render(<App />);
+      await addTodo(user, "Walk dog");
+      expect(screen.queryByRole("button", { name: "Clear completed" })).not.toBeInTheDocument();
+      await user.click(screen.getByRole("checkbox", { name: "Completed: Walk dog" }));
+      expect(screen.getByRole("button", { name: "Clear completed" })).toBeInTheDocument();
+    });
+
+    it("removes every Completed Todo, keeps the Active ones, and persists", async () => {
+      const user = userEvent.setup();
+      const { unmount } = render(<App />);
+      await addTodo(user, "Walk dog");
+      await addTodo(user, "Pay rent");
+      await addTodo(user, "Call mum");
+      await user.click(screen.getByRole("checkbox", { name: "Completed: Pay rent" }));
+      await user.click(screen.getByRole("checkbox", { name: "Completed: Call mum" }));
+
+      await user.click(screen.getByRole("button", { name: "Clear completed" }));
+      expect(todoTitles()).toEqual(["Walk dog"]);
+      expect(screen.queryByRole("button", { name: "Clear completed" })).not.toBeInTheDocument();
+      unmount();
+
+      render(<App />);
+      expect(todoTitles()).toEqual(["Walk dog"]);
+    });
+  });
+
   describe("deleting", () => {
     it("removes a Todo, updates the Active count, and stays removed after a reload", async () => {
       const user = userEvent.setup();

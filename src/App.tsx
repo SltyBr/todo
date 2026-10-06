@@ -36,6 +36,10 @@ export function App() {
     updateTodos(todos.filter((todo) => todo.id !== id));
   }
 
+  function handleClearCompleted() {
+    updateTodos(todos.filter((todo) => !todo.completed));
+  }
+
   return (
     <main className="app">
       <h1>Todos</h1>
@@ -71,6 +75,11 @@ export function App() {
               </a>
             ))}
           </nav>
+          {activeCount < todos.length && (
+            <button type="button" onClick={handleClearCompleted}>
+              Clear completed
+            </button>
+          )}
         </footer>
       )}
     </main>
