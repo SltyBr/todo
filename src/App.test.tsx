@@ -11,7 +11,7 @@ function todoTitles() {
     .map((item) => within(item).getByTestId("todo-title").textContent);
 }
 
-function todoItem(title: string) {
+function todoRow(title: string) {
   const list = screen.getByRole("list", { name: "Todos" });
   const item = within(list)
     .getAllByRole("listitem")
@@ -73,11 +73,11 @@ describe("App", () => {
 
       await user.click(toggle);
       expect(toggle).toBeChecked();
-      expect(todoItem("Buy milk")).toHaveClass("completed");
+      expect(todoRow("Buy milk")).toHaveClass("completed");
 
       await user.click(toggle);
       expect(toggle).not.toBeChecked();
-      expect(todoItem("Buy milk")).not.toHaveClass("completed");
+      expect(todoRow("Buy milk")).not.toHaveClass("completed");
     });
 
     it("keeps the Completed state after a reload", async () => {
@@ -256,7 +256,7 @@ describe("App", () => {
       unmount();
 
       render(<App />);
-      expect(within(todoItem("Pack")).getByTestId("todo-description").textContent).toBe(
+      expect(within(todoRow("Pack")).getByTestId("todo-description").textContent).toBe(
         "Passport\n<b>Charger</b>",
       );
     });
@@ -273,7 +273,7 @@ describe("App", () => {
       expect(screen.getByRole("textbox", { name: "Description" })).toHaveValue("Passport");
       await user.clear(screen.getByRole("textbox", { name: "Description" }));
       await user.click(screen.getByRole("button", { name: "Save" }));
-      expect(within(todoItem("Pack")).queryByTestId("todo-description")).not.toBeInTheDocument();
+      expect(within(todoRow("Pack")).queryByTestId("todo-description")).not.toBeInTheDocument();
     });
   });
 });

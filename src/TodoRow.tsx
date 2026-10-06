@@ -1,14 +1,14 @@
 import { useState, type FormEvent } from "react";
-import { cleanTitle, type Todo } from "./todo";
+import { cleanTitle, type Todo, type TodoChanges } from "./todo";
 
 type Props = {
   todo: Todo;
   onToggle: () => void;
-  onSave: (changes: { title: string; description: string }) => void;
+  onSave: (changes: TodoChanges) => void;
   onDelete: () => void;
 };
 
-export function TodoItem({ todo, onToggle, onSave, onDelete }: Props) {
+export function TodoRow({ todo, onToggle, onSave, onDelete }: Props) {
   const [editing, setEditing] = useState(false);
   const [title, setTitle] = useState(todo.title);
   const [description, setDescription] = useState(todo.description);
@@ -70,7 +70,7 @@ export function TodoItem({ todo, onToggle, onSave, onDelete }: Props) {
         checked={todo.completed}
         onChange={onToggle}
       />
-      <div className="todo-text">
+      <div className="todo-body">
         <span className="todo-title" data-testid="todo-title">
           {todo.title}
         </span>

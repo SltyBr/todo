@@ -138,7 +138,7 @@ button.primary,
   font-size: 0.9rem;
 }
 
-.todo-text {
+.todo-body {
   flex: 1;
   min-width: 0;
 }

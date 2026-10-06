@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from "react";
 import { FILTERS, matchesFilter, useFilter } from "./filter";
 import { loadTodos, saveTodos } from "./storage";
-import { TodoItem } from "./TodoItem";
+import { TodoRow } from "./TodoRow";
 import { cleanTitle, type Todo } from "./todo";
 
 export function App() {
@@ -24,11 +24,7 @@ export function App() {
     setNewTitle("");
   }
 
-  function handleToggle(id: string) {
-    updateTodos(todos.map((todo) => (todo.id === id ? { ...todo, completed: !todo.completed } : todo)));
-  }
-
-  function handleSave(id: string, changes: { title: string; description: string }) {
+  function updateTodo(id: string, changes: Partial<Omit<Todo, "id">>) {
     updateTodos(todos.map((todo) => (todo.id === id ? { ...todo, ...changes } : todo)));
   }
 
@@ -54,11 +50,11 @@ export function App() {
       </form>
       <ul className="todo-list" aria-label="Todos">
         {visibleTodos.map((todo) => (
-          <TodoItem
+          <TodoRow
             key={todo.id}
             todo={todo}
-            onToggle={() => handleToggle(todo.id)}
-            onSave={(changes) => handleSave(todo.id, changes)}
+            onToggle={() => updateTodo(todo.id, { completed: !todo.completed })}
+            onSave={(changes) => updateTodo(todo.id, changes)}
             onDelete={() => handleDelete(todo.id)}
           />
         ))}
