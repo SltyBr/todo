@@ -11,6 +11,15 @@ function todoTitles() {
     .map((item) => within(item).getByTestId("todo-title").textContent);
 }
 
+function todoItem(title: string) {
+  const list = screen.getByRole("list", { name: "Todos" });
+  const item = within(list)
+    .getAllByRole("listitem")
+    .find((li) => within(li).getByTestId("todo-title").textContent === title);
+  if (!item) throw new Error(`No Todo titled "${title}"`);
+  return item;
+}
+
 async function addTodo(user: ReturnType<typeof userEvent.setup>, title: string) {
   await user.type(screen.getByRole("textbox", { name: "New Todo" }), `${title}{Enter}`);
 }
@@ -52,5 +61,45 @@ describe("App", () => {
     unmount();
     render(<App />);
     expect(todoTitles()).toEqual(["Buy milk"]);
+  });
+
+  describe("Completed", () => {
+    it("marks a Todo Completed and Active again", async () => {
+      const user = userEvent.setup();
+      render(<App />);
+      await addTodo(user, "Buy milk");
+      const toggle = screen.getByRole("checkbox", { name: "Completed: Buy milk" });
+      expect(toggle).not.toBeChecked();
+
+      await user.click(toggle);
+      expect(toggle).toBeChecked();
+      expect(todoItem("Buy milk")).toHaveClass("completed");
+
+      await user.click(toggle);
+      expect(toggle).not.toBeChecked();
+      expect(todoItem("Buy milk")).not.toHaveClass("completed");
+    });
+
+    it("keeps the Completed state after a reload", async () => {
+      const user = userEvent.setup();
+      const { unmount } = render(<App />);
+      await addTodo(user, "Buy milk");
+      await user.click(screen.getByRole("checkbox", { name: "Completed: Buy milk" }));
+      unmount();
+      render(<App />);
+      expect(screen.getByRole("checkbox", { name: "Completed: Buy milk" })).toBeChecked();
+    });
+
+    it("counts the Active Todos", async () => {
+      const user = userEvent.setup();
+      render(<App />);
+      await addTodo(user, "One");
+      expect(screen.getByText("1 Active Todo")).toBeInTheDocument();
+      await addTodo(user, "Two");
+      await addTodo(user, "Three");
+      expect(screen.getByText("3 Active Todos")).toBeInTheDocument();
+      await user.click(screen.getByRole("checkbox", { name: "Completed: Two" }));
+      expect(screen.getByText("2 Active Todos")).toBeInTheDocument();
+    });
   });
 });

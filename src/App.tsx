@@ -5,6 +5,7 @@ import { cleanTitle, type Todo } from "./todo";
 export function App() {
   const [todos, setTodos] = useState<Todo[]>(loadTodos);
   const [newTitle, setNewTitle] = useState("");
+  const activeCount = todos.filter((todo) => !todo.completed).length;
 
   function updateTodos(next: Todo[]) {
     setTodos(next);
@@ -17,6 +18,10 @@ export function App() {
     if (title === null) return;
     updateTodos([...todos, { id: crypto.randomUUID(), title, description: "", completed: false }]);
     setNewTitle("");
+  }
+
+  function handleToggle(id: string) {
+    updateTodos(todos.map((todo) => (todo.id === id ? { ...todo, completed: !todo.completed } : todo)));
   }
 
   return (
@@ -33,13 +38,26 @@ export function App() {
       </form>
       <ul className="todo-list" aria-label="Todos">
         {todos.map((todo) => (
-          <li key={todo.id} className="todo">
+          <li key={todo.id} className={todo.completed ? "todo completed" : "todo"}>
+            <input
+              type="checkbox"
+              aria-label={`Completed: ${todo.title}`}
+              checked={todo.completed}
+              onChange={() => handleToggle(todo.id)}
+            />
             <span className="todo-title" data-testid="todo-title">
               {todo.title}
             </span>
           </li>
         ))}
       </ul>
+      {todos.length > 0 && (
+        <footer className="footer">
+          <span>
+            {activeCount} Active {activeCount === 1 ? "Todo" : "Todos"}
+          </span>
+        </footer>
+      )}
     </main>
   );
 }
