@@ -1,4 +1,4 @@
-import { render, screen, within } from "@testing-library/react";
+import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it } from "vitest";
 import { App } from "./App";
@@ -100,6 +100,77 @@ describe("App", () => {
       expect(screen.getByText("3 Active Todos")).toBeInTheDocument();
       await user.click(screen.getByRole("checkbox", { name: "Completed: Two" }));
       expect(screen.getByText("2 Active Todos")).toBeInTheDocument();
+    });
+  });
+
+  describe("Filter", () => {
+    async function renderWithTodos() {
+      const user = userEvent.setup();
+      const result = render(<App />);
+      await addTodo(user, "Walk dog");
+      await addTodo(user, "Pay rent");
+      await user.click(screen.getByRole("checkbox", { name: "Completed: Pay rent" }));
+      return { user, ...result };
+    }
+
+    function filterLink(name: string) {
+      return within(screen.getByRole("navigation", { name: "Filter" })).getByRole("link", { name });
+    }
+
+    it("shows only the Todos matching the chosen Filter and puts it in the URL hash", async () => {
+      const { user } = await renderWithTodos();
+      expect(filterLink("All")).toHaveAttribute("aria-current", "page");
+
+      await user.click(filterLink("Active"));
+      expect(window.location.hash).toBe("#/active");
+      expect(todoTitles()).toEqual(["Walk dog"]);
+      expect(filterLink("Active")).toHaveAttribute("aria-current", "page");
+      expect(filterLink("All")).not.toHaveAttribute("aria-current");
+
+      await user.click(filterLink("Completed"));
+      expect(window.location.hash).toBe("#/completed");
+      expect(todoTitles()).toEqual(["Pay rent"]);
+
+      await user.click(filterLink("All"));
+      expect(window.location.hash).toBe("#/");
+      expect(todoTitles()).toEqual(["Walk dog", "Pay rent"]);
+    });
+
+    it("restores the Filter from the URL hash on load", async () => {
+      const { unmount } = await renderWithTodos();
+      unmount();
+      window.location.hash = "#/completed";
+      render(<App />);
+      expect(todoTitles()).toEqual(["Pay rent"]);
+      expect(filterLink("Completed")).toHaveAttribute("aria-current", "page");
+    });
+
+    it("falls back to All for an unknown hash", async () => {
+      const { unmount } = await renderWithTodos();
+      unmount();
+      window.location.hash = "#/nope";
+      render(<App />);
+      expect(todoTitles()).toEqual(["Walk dog", "Pay rent"]);
+      expect(filterLink("All")).toHaveAttribute("aria-current", "page");
+    });
+
+    it("follows browser back and forward", async () => {
+      const { user } = await renderWithTodos();
+      await user.click(filterLink("Active"));
+      await user.click(filterLink("Completed"));
+
+      window.history.back();
+      await waitFor(() => expect(todoTitles()).toEqual(["Walk dog"]));
+      window.history.forward();
+      await waitFor(() => expect(todoTitles()).toEqual(["Pay rent"]));
+    });
+
+    it("hides a Todo from the Active Filter once it is marked Completed", async () => {
+      const { user } = await renderWithTodos();
+      await user.click(filterLink("Active"));
+      await user.click(screen.getByRole("checkbox", { name: "Completed: Walk dog" }));
+      expect(todoTitles()).toEqual([]);
+      expect(screen.getByText("0 Active Todos")).toBeInTheDocument();
     });
   });
 

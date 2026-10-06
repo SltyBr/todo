@@ -1,4 +1,5 @@
 import { useState, type FormEvent } from "react";
+import { FILTERS, matchesFilter, useFilter } from "./filter";
 import { loadTodos, saveTodos } from "./storage";
 import { TodoItem } from "./TodoItem";
 import { cleanTitle, type Todo } from "./todo";
@@ -6,6 +7,8 @@ import { cleanTitle, type Todo } from "./todo";
 export function App() {
   const [todos, setTodos] = useState<Todo[]>(loadTodos);
   const [newTitle, setNewTitle] = useState("");
+  const filter = useFilter();
+  const visibleTodos = todos.filter((todo) => matchesFilter(todo, filter));
   const activeCount = todos.filter((todo) => !todo.completed).length;
 
   function updateTodos(next: Todo[]) {
@@ -46,7 +49,7 @@ export function App() {
         <button type="submit">Add</button>
       </form>
       <ul className="todo-list" aria-label="Todos">
-        {todos.map((todo) => (
+        {visibleTodos.map((todo) => (
           <TodoItem
             key={todo.id}
             todo={todo}
@@ -61,6 +64,13 @@ export function App() {
           <span>
             {activeCount} Active {activeCount === 1 ? "Todo" : "Todos"}
           </span>
+          <nav className="filters" aria-label="Filter">
+            {FILTERS.map((f) => (
+              <a key={f.filter} href={f.hash} aria-current={f.filter === filter ? "page" : undefined}>
+                {f.label}
+              </a>
+            ))}
+          </nav>
         </footer>
       )}
     </main>
