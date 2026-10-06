@@ -7,7 +7,8 @@ export function loadTodos(): Todo[] {
   try {
     const envelope: unknown = JSON.parse(localStorage.getItem(KEY) ?? "null");
     if (!isEnvelope(envelope)) return [];
-    return envelope.todos;
+    // Skip only the malformed Todos so one bad record can't wipe the rest.
+    return envelope.todos.filter(isTodo);
   } catch {
     return [];
   }
@@ -17,13 +18,8 @@ export function saveTodos(todos: Todo[]): void {
   localStorage.setItem(KEY, JSON.stringify({ version: 1, todos }));
 }
 
-function isEnvelope(value: unknown): value is { version: 1; todos: Todo[] } {
-  return (
-    isRecord(value) &&
-    value.version === 1 &&
-    Array.isArray(value.todos) &&
-    value.todos.every(isTodo)
-  );
+function isEnvelope(value: unknown): value is { version: 1; todos: unknown[] } {
+  return isRecord(value) && value.version === 1 && Array.isArray(value.todos);
 }
 
 function isTodo(value: unknown): value is Todo {
